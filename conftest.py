@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from levenshtein.main import app
+from levenshtein import app
 
 
 @pytest.fixture()
