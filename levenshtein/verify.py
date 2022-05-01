@@ -4,25 +4,9 @@ from typing import (
     Union
 )
 
-import yaml
 from thefuzz import process
-from fastapi import FastAPI
 
 from levenshtein.schema import Customer
-from levenshtein.schema import CustomerList
-from levenshtein.schema import Vote
-
-with open("settings.yml") as f:
-    try:
-        settings = yaml.safe_load(f)
-    except yaml.YAMLError as err:
-        print(err)
-        raise err
-
-app = FastAPI()
-
-MATCH_CONFIDENCE: float = float(settings["MATCH_CONFIDENCE"])
-RESTRICTED_NAMES: List[str] = settings["RESTRICTED_NAMES"]
 
 
 def get_possible_names(customer: Customer) -> List[str]:
@@ -47,8 +31,8 @@ def get_possible_names(customer: Customer) -> List[str]:
 
 def validate_name(
     names: List[str], 
-    restricted_names: List[str] = RESTRICTED_NAMES,
-    match_confidence: float = MATCH_CONFIDENCE
+    restricted_names: List[str],
+    match_confidence: float,
 ) -> Dict[str, Union[bool, int, str]]:
     """
 
@@ -69,22 +53,3 @@ def validate_name(
                 "match_score": candidate[1]
             }
     return {"vote": True}
-
-
-@app.post("/validate-name/", response_model=Vote)
-def single_validation(customer: Customer):
-    names = get_possible_names(customer)
-    result = validate_name(names, RESTRICTED_NAMES, MATCH_CONFIDENCE)
-    return result
-
-
-@app.post("/validate-names/", response_model=List[Vote])
-def batch_validation(customers: CustomerList):
-    results = []
-    for customer in customers:
-        names = get_possible_names(customer)
-        result = validate_name(names, RESTRICTED_NAMES, MATCH_CONFIDENCE)
-        results.append(result)
-    return results
-
-

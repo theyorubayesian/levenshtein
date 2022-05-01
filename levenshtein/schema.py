@@ -37,6 +37,7 @@ class CustomerList(BaseModel):
         }
 
 
+# TODO: Include defaults for candidate and match score?
 class Vote(BaseModel):
     vote: bool = Field(..., example=False)
     candidate: Optional[str] = Field(example="Akintunde Oladipo")

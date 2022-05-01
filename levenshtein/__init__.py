@@ -1,25 +1,48 @@
-# import logging
+import logging
+from typing import List
 
-# import azure.functions as func
-# import thefuzz
+import azure.functions as func
+import yaml
+from azure.functions import AsgiMiddleware
+from fastapi import FastAPI
 
-# def main(req: func.HttpRequest) -> func.HttpResponse:
-#     logging.info('Python HTTP trigger function processed a request.')
+from levenshtein.schema import (
+    Customer,
+    CustomerList,
+    Vote
+)
+from levenshtein.verify import get_possible_names
+from levenshtein.verify import validate_name
 
-    
-#     name = req.params.get('name')
-#     if not name:
-#         try:
-#             req_body = req.get_json()
-#         except ValueError:
-#             pass
-#         else:
-#             name = req_body.get('name')
+with open("settings.yml") as f:
+    try:
+        settings = yaml.safe_load(f)
+    except yaml.YAMLError as err:
+        print(err)
+        raise err
 
-#     if name:
-#         return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-#     else:
-#         return func.HttpResponse(
-#              "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-#              status_code=200
-#         )
+MATCH_CONFIDENCE: float = float(settings["MATCH_CONFIDENCE"])
+RESTRICTED_NAMES: List[str] = settings["RESTRICTED_NAMES"]
+
+app = FastAPI()
+
+# TODO: Include Logging
+@app.post("/validate-name/", response_model=Vote)
+async def single_validation(customer: Customer):
+    names = get_possible_names(customer)
+    result = validate_name(names, RESTRICTED_NAMES, MATCH_CONFIDENCE)
+    return result
+
+
+@app.post("/validate-names/", response_model=List[Vote])
+async def batch_validation(customers: CustomerList):
+    results = []
+    for customer in customers:
+        names = get_possible_names(customer)
+        result = validate_name(names, RESTRICTED_NAMES, MATCH_CONFIDENCE)
+        results.append(result)
+    return results
+
+
+def main(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    return AsgiMiddleware(app).handle(req, context)
