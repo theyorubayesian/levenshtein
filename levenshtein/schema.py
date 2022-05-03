@@ -41,4 +41,4 @@ class CustomerList(BaseModel):
 class Vote(BaseModel):
     vote: bool = Field(..., example=False)
     candidate: Optional[str] = Field(example="Akintunde Oladipo")
-    match_score: float = Field(example=84)
+    match_score: Optional[float] = Field(example=84)

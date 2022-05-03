@@ -13,7 +13,7 @@ def get_possible_names(customer: Customer) -> List[str]:
     """
     Get list of name combinations to test
 
-    @param customer: 
+    @param customer: Customer object containing first, middle and last names
 
     @return: Permutation of customer first, middle and last names.
     """
@@ -35,13 +35,15 @@ def validate_name(
     match_confidence: float,
 ) -> Dict[str, Union[bool, int, str]]:
     """
+    Validate that no name in `names` matches any in `restricted_names`
+    with a confidence >= match_confidence
 
+    @param names: List of names to validate
+    @param restricted_names: List of names to validate against
+    @param match_confidence: Minimum confidence of match
 
-    @param names:
-    @param restricted_names:
-    @param match_confidence:
-
-    @return:
+    @return: {vote: False if any match is found else True}. 
+    If match is found, candidate and match score are also returned.
     """
     for name in names:
         candidate = process.extractOne(

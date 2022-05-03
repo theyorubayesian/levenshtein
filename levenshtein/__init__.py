@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 import azure.functions as func
@@ -21,12 +20,12 @@ with open("settings.yml") as f:
         print(err)
         raise err
 
-MATCH_CONFIDENCE: float = float(settings["MATCH_CONFIDENCE"])
-RESTRICTED_NAMES: List[str] = settings["RESTRICTED_NAMES"]
+MATCH_CONFIDENCE: float = float(settings["MATCH-CONFIDENCE"])
+RESTRICTED_NAMES: List[str] = settings["RESTRICTED-NAMES"]
 
 app = FastAPI()
 
-# TODO: Include Logging
+
 @app.post("/validate-name/", response_model=Vote)
 async def single_validation(customer: Customer):
     names = get_possible_names(customer)
@@ -37,7 +36,7 @@ async def single_validation(customer: Customer):
 @app.post("/validate-names/", response_model=List[Vote])
 async def batch_validation(customers: CustomerList):
     results = []
-    for customer in customers:
+    for customer in customers.customers:
         names = get_possible_names(customer)
         result = validate_name(names, RESTRICTED_NAMES, MATCH_CONFIDENCE)
         results.append(result)
