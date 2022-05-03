@@ -1,7 +1,10 @@
 import requests
 
-url = "http://127.0.0.1:8000/validate-name/"
+url = "http://localhost:7071/validate-name/"
 
+# -----------------
+# Single Validation
+# -----------------
 sample = {
     "first_name": "Jumia Plc.",
     "middle_name": "",
@@ -12,4 +15,18 @@ print(sample)
 response = requests.post(url, json=sample,  headers={"Content-type": "application/json"})
 print(response.text)
 print("Status Code: ", response.status_code)
-print("Reason: ", response.reason)
+print("Result: ", response.json())
+
+# ----------------
+# Batch Validation
+# ----------------
+url = "http://localhost:7071/validate-names/"
+samples = {
+    "customers": [sample, sample]
+}
+print(samples)
+
+response = requests.post(url, json=samples,  headers={"Content-type": "application/json"})
+print(response.text)
+print("Status Code: ", response.status_code)
+print("Result: ", response.json())
